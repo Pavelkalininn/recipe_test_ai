@@ -313,8 +313,17 @@ app.post('/api/recipes/:id/rate', requireAuth, async (req, res) => {
   }
 });
 
-// Serve main page
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// Serve main page - ВАЖНО: этот роут должен быть последним!
 app.get('*', (req, res) => {
+  // Не перехватываем API запросы
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint не найден' });
+  }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 

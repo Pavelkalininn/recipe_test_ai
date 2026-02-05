@@ -18,12 +18,21 @@ const api = {
         },
       });
       
-      if (!response.ok && response.status !== 401) {
-        const error = await response.json();
-        throw new Error(error.error || 'Ошибка сервера');
+      const contentType = response.headers.get('content-type');
+      
+      // Проверяем, что получили JSON
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Получен не JSON ответ:', await response.text());
+        throw new Error('Ошибка сервера: получен неверный формат ответа');
       }
       
-      return response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка сервера');
+      }
+      
+      return data;
     } catch (err) {
       console.error('API Error:', err);
       throw err;
